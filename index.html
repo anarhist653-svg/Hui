@@ -3,53 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#000000">
     <title></title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: black;
+            background: #000;
+            touch-action: manipulation;
         }
 
-        img {
+        #wallpaper {
             position: fixed;
+            inset: 0;
             width: 100%;
             height: 100%;
-            inset: 0;
             object-fit: cover;
+            object-position: center;
         }
     </style>
 </head>
 <body>
-
-    <img src="Oboi.WEBP" alt="">
+    <img id="wallpaper" src="Oboi.WEBP" alt="">
 
     <audio
         id="music"
         src="Golda-standoff-2.mp3"
         autoplay
         loop
+        preload="auto"
         playsinline>
     </audio>
 
     <script>
         const music = document.getElementById("music");
-
         music.volume = 1;
 
-        music.play().catch(() => {
-            // Браузер может заблокировать автоматическое воспроизведение.
-        });
-    </script>
+        let started = false;
 
+        function startMusic() {
+            if (started && !music.paused) return;
+
+            // Вызываем play непосредственно из обработчика жеста пользователя.
+            const playPromise = music.play();
+
+            if (playPromise && typeof playPromise.then === "function") {
+                playPromise
+                    .then(() => { started = true; })
+                    .catch((error) => {
+                        console.error("Не удалось запустить аудио:", error);
+                    });
+            }
+        }
+
+        // Первая попытка — сразу при загрузке страницы.
+        window.addEventListener("load", startMusic);
+
+        // Если автозапуск заблокирован, любое первое касание/нажатие
+        // по странице повторно запускает аудио.
+        document.addEventListener("pointerdown", startMusic);
+        document.addEventListener("touchend", startMusic, { passive: true });
+        document.addEventListener("click", startMusic);
+    </script>
 </body>
 </html>
