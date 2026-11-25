@@ -3,10 +3,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
 
     <style>
@@ -23,133 +20,67 @@
             background: #000;
         }
 
-        /* РЕЖИМ С ФОТОГРАФИЕЙ */
-
-        #photoMode {
-            display: none;
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
-
-        #wallpaper {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-        }
-
-        /* РЕЖИМ СО ВТОРЫМ САЙТОМ */
-
-        #siteMode {
-            display: none;
+        /* Сайт под изображением */
+        #site {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
             border: none;
-            background: #fff;
+            z-index: 1;
+        }
+
+        /* Изображение поверх сайта */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: #000;
+        }
+
+        #overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ФОТОГРАФИЯ И МУЗЫКА -->
+    <iframe
+        id="site"
+        src="https://поконтракту.рф/"
+        allow="autoplay; fullscreen">
+    </iframe>
 
-    <div id="photoMode">
-        <img id="wallpaper" src="Oboi.WEBP" alt="">
+    <div id="overlay">
+        <img src="Oboi.WEBP" alt="">
 
         <audio
             id="music"
             src="Golda-standoff-2.mp3"
             autoplay
             loop
-            preload="auto"
-            playsinline>
+            preload="auto">
         </audio>
     </div>
 
-    <!-- ВТОРОЙ САЙТ -->
-
-    <iframe
-        id="siteMode"
-        src="about:blank"
-        allow="autoplay; fullscreen"
-        referrerpolicy="no-referrer">
-    </iframe>
-
     <script>
-        // =====================================
-        // НАСТРОЙКИ
-        // =====================================
-
-        const SITE_URL = "https://поконтракту.рф/";
-
-        // Вероятность первого режима: 50%
-        const PHOTO_CHANCE = 0.5;
-
-        // =====================================
-        // ЭЛЕМЕНТЫ
-        // =====================================
-
-        const photoMode = document.getElementById("photoMode");
-        const siteMode = document.getElementById("siteMode");
         const music = document.getElementById("music");
 
-        // =====================================
-        // СЛУЧАЙНЫЙ ВЫБОР
-        // =====================================
+        music.volume = 1;
 
-        const random = Math.random();
-
-        if (random < PHOTO_CHANCE) {
-
-            // РЕЖИМ 1: ФОТО + МУЗЫКА
-
-            photoMode.style.display = "block";
-
-            siteMode.style.display = "none";
-
-            music.volume = 1;
-
-            function playMusic() {
-                music.play().catch(error => {
-                    console.log(
-                        "Автовоспроизведение заблокировано браузером:",
-                        error
-                    );
-                });
-            }
-
-            // Первая попытка автоматического запуска
-            window.addEventListener("load", playMusic);
-
-            // Повторная попытка при взаимодействии
-            document.addEventListener("pointerdown", playMusic);
-
-            document.addEventListener(
-                "touchend",
-                playMusic,
-                { passive: true }
-            );
-
-            document.addEventListener("click", playMusic);
-
-        } else {
-
-            // РЕЖИМ 2: САЙТ ПОКОНТРАКТУ
-
-            photoMode.style.display = "none";
-
-            siteMode.style.display = "block";
-
-            siteMode.src = SITE_URL;
+        function playMusic() {
+            music.play().catch(() => {});
         }
+
+        window.addEventListener("load", playMusic);
+        document.addEventListener("click", playMusic);
+        document.addEventListener("touchstart", playMusic);
     </script>
 
 </body>
