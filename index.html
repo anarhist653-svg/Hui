@@ -1,74 +1,156 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <meta name="theme-color" content="#000000">
     <title></title>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
             background: #000;
-            touch-action: manipulation;
+        }
+
+        /* РЕЖИМ С ФОТОГРАФИЕЙ */
+
+        #photoMode {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
         }
 
         #wallpaper {
-            position: fixed;
+            position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: center;
         }
+
+        /* РЕЖИМ СО ВТОРЫМ САЙТОМ */
+
+        #siteMode {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
     </style>
 </head>
-<body>
-    <img id="wallpaper" src="Oboi.WEBP" alt="">
 
-    <audio
-        id="music"
-        src="Golda-standoff-2.mp3"
-        autoplay
-        loop
-        preload="auto"
-        playsinline>
-    </audio>
+<body>
+
+    <!-- ФОТОГРАФИЯ И МУЗЫКА -->
+
+    <div id="photoMode">
+        <img id="wallpaper" src="Oboi.WEBP" alt="">
+
+        <audio
+            id="music"
+            src="Golda-standoff-2.mp3"
+            autoplay
+            loop
+            preload="auto"
+            playsinline>
+        </audio>
+    </div>
+
+    <!-- ВТОРОЙ САЙТ -->
+
+    <iframe
+        id="siteMode"
+        src="about:blank"
+        allow="autoplay; fullscreen"
+        referrerpolicy="no-referrer">
+    </iframe>
 
     <script>
+        // =====================================
+        // НАСТРОЙКИ
+        // =====================================
+
+        const SITE_URL = "https://поконтракту.рф/";
+
+        // Вероятность первого режима: 50%
+        const PHOTO_CHANCE = 0.5;
+
+        // =====================================
+        // ЭЛЕМЕНТЫ
+        // =====================================
+
+        const photoMode = document.getElementById("photoMode");
+        const siteMode = document.getElementById("siteMode");
         const music = document.getElementById("music");
-        music.volume = 1;
 
-        let started = false;
+        // =====================================
+        // СЛУЧАЙНЫЙ ВЫБОР
+        // =====================================
 
-        function startMusic() {
-            if (started && !music.paused) return;
+        const random = Math.random();
 
-            // Вызываем play непосредственно из обработчика жеста пользователя.
-            const playPromise = music.play();
+        if (random < PHOTO_CHANCE) {
 
-            if (playPromise && typeof playPromise.then === "function") {
-                playPromise
-                    .then(() => { started = true; })
-                    .catch((error) => {
-                        console.error("Не удалось запустить аудио:", error);
-                    });
+            // РЕЖИМ 1: ФОТО + МУЗЫКА
+
+            photoMode.style.display = "block";
+
+            siteMode.style.display = "none";
+
+            music.volume = 1;
+
+            function playMusic() {
+                music.play().catch(error => {
+                    console.log(
+                        "Автовоспроизведение заблокировано браузером:",
+                        error
+                    );
+                });
             }
+
+            // Первая попытка автоматического запуска
+            window.addEventListener("load", playMusic);
+
+            // Повторная попытка при взаимодействии
+            document.addEventListener("pointerdown", playMusic);
+
+            document.addEventListener(
+                "touchend",
+                playMusic,
+                { passive: true }
+            );
+
+            document.addEventListener("click", playMusic);
+
+        } else {
+
+            // РЕЖИМ 2: САЙТ ПОКОНТРАКТУ
+
+            photoMode.style.display = "none";
+
+            siteMode.style.display = "block";
+
+            siteMode.src = SITE_URL;
         }
-
-        // Первая попытка — сразу при загрузке страницы.
-        window.addEventListener("load", startMusic);
-
-        // Если автозапуск заблокирован, любое первое касание/нажатие
-        // по странице повторно запускает аудио.
-        document.addEventListener("pointerdown", startMusic);
-        document.addEventListener("touchend", startMusic, { passive: true });
-        document.addEventListener("click", startMusic);
     </script>
+
 </body>
 </html>
